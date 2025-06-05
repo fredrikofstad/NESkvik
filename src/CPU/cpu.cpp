@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "lookup.h"
 
 CPU::CPU() {
 }

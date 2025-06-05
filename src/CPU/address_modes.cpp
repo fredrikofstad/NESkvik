@@ -2,4 +2,4 @@
 // NESkvikk - Fredrik Ofstad
 //
 
-#include "addressing_modes.h"
+#include "address_modes.h"

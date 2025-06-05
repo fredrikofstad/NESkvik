@@ -11,5 +11,6 @@ add_executable(NESkvik src/main.cpp
         src/Types.h
         src/CPU/opcodes.cpp
         src/CPU/opcodes.h
-        src/CPU/addressing_modes.cpp
-        src/CPU/addressing_modes.h)
+        src/CPU/address_modes.cpp
+        src/CPU/address_modes.h
+        src/CPU/lookup.h)

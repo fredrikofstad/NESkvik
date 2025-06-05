@@ -2,6 +2,9 @@
 // Emulation of a 6502 cpu
 //
 #pragma once
+#include <string>
+#include <vector>
+
 #include "bus.h"
 
 
@@ -24,19 +27,6 @@ public:
         Negative = (1 << 7),   // sets negative for signed vars
     };
 
-    // Addressing Modes
-    uint8_t IMP();
-    uint8_t IMM();
-    uint8_t ZPO();
-    uint8_t ZPX();
-    uint8_t ZPY();
-    uint8_t REL();
-    uint8_t ABS();
-    uint8_t ABX();
-    uint8_t ABY();
-    uint8_t IND();
-    uint8_t IZX();
-    uint8_t IZY();
 
     // 6502 CPU Registers
     uint8_t a = 0x00;        // Accumulator
@@ -45,6 +35,19 @@ public:
     uint16_t pc = 0x0000;    // Program counter
     uint8_t sp = 0x00;       // Stack pointer
     uint8_t status = 0x00;   // Processor status flags
+
+    void clock();  // clock signal
+    void reset();  // request signal
+    void irq();    // interrupt request signal
+    void nmi();    // non-maskable interrupt signal
+
+    uint8_t fetch();
+    uint8_t fetched_data = 0x00;
+
+    uint16_t address_abs = 0x0000;
+    uint16_t address_rel = 0x00;
+    uint8_t current_opcode = 0x00;
+    uint8_t cycles = 0;
 
 private:
     bus* bus = nullptr;

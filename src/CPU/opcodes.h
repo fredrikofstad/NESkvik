@@ -89,5 +89,7 @@ namespace opcodes {
     // System
     uint8_t BRK(CPU& cpu);
     uint8_t NOP(CPU& cpu);
+    //Catch all
+    uint8_t XXX(CPU& cpu);
 
 }
