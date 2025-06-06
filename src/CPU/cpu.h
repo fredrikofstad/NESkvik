@@ -41,6 +41,9 @@ public:
     void irq();    // interrupt request signal
     void nmi();    // non-maskable interrupt signal
 
+    uint8_t read(uint8_t address) const;
+    void write(uint8_t address, uint8_t data);
+
     uint8_t fetch();
     uint8_t fetched_data = 0x00;
 
@@ -51,8 +54,6 @@ public:
 
 private:
     bus* bus = nullptr;
-    uint8_t read(uint8_t address) const;
-    void write(uint8_t address, uint8_t data);
 
     uint8_t getFlag(flags flag);
     void setFlag(flags flag, bool value);
