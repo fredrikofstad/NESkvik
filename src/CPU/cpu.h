@@ -7,15 +7,7 @@
 
 #include "bus.h"
 
-
-class CPU {
-public:
-    CPU();
-
-    void AttachBus(bus* bus) {
-        this->bus = bus;
-    }
-
+namespace flags {
     enum flags {
         Carry = (1 << 0),      // sets the carry flag
         Zero = (1 << 1),       // sets result as zero
@@ -26,6 +18,16 @@ public:
         Overflow = (1 << 6),   // sets overflow flag
         Negative = (1 << 7),   // sets negative for signed vars
     };
+}
+
+
+class CPU {
+public:
+    CPU();
+
+    void AttachBus(bus* bus) {
+        this->bus = bus;
+    }
 
 
     // 6502 CPU Registers
@@ -44,9 +46,17 @@ public:
     uint8_t read(uint8_t address) const;
     void write(uint8_t address, uint8_t data);
 
-    uint8_t fetch();
-    uint8_t fetched_data = 0x00;
+    uint8_t getFlag(flags flag);
+    void setFlag(flags flag, bool value);
 
+    uint8_t fetch();
+
+    void branchIf(bool condition);
+    void compare(uint8_t reg);
+    uint8_t load(uint8_t reg);
+
+    uint8_t fetched_data = 0x00;
+    uint8_t store = 0x000;
     uint16_t address_abs = 0x0000;
     uint16_t address_rel = 0x00;
     uint8_t current_opcode = 0x00;
@@ -54,9 +64,6 @@ public:
 
 private:
     bus* bus = nullptr;
-
-    uint8_t getFlag(flags flag);
-    void setFlag(flags flag, bool value);
 
 };
 

@@ -133,3 +133,4 @@ std::array<Instruction, 256> lookup = {
     Instruction{ "ROR", &opcodes::ROR, &address_mode::ABX, 7 },
     Instruction{ "XXX", &opcodes::XXX, &address_mode::IMP, 7 },
 };
+
