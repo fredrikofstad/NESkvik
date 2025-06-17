@@ -1,6 +1,6 @@
 #include "bus.h"
 
-bus::bus() {
+Bus::Bus() {
     // Clear RAM on startup
     for (auto &i : ram) i = 0x00;
 
@@ -14,7 +14,7 @@ bool isPPURam(const uint16_t address) {
     return address <= 0x2000 || address >= 0x3FFF;
 }
 
-uint8_t bus::read(uint16_t address, bool readOnly) const {
+uint8_t Bus::read(uint16_t address, bool readOnly) const {
     uint8_t data = 0x00;
     /*
     if (rom->mainBusRead(address, data))
@@ -28,22 +28,22 @@ uint8_t bus::read(uint16_t address, bool readOnly) const {
     return data;
 }
 
-void bus::write(uint16_t address, uint8_t data) {
+void Bus::write(uint16_t address, uint8_t data) {
     if (isSystemRam(address)) ram[address & 0x07FF] = data;
     else if (isPPURam(address)) ppu.mainBusWrite(address & 0x0007, data);
 }
 
-void bus::attachRom(const shared<ROM> &rom) {
+void Bus::attachRom(const shared<ROM> &rom) {
     this->rom = rom;
     ppu.attachRom(rom);
 }
 
-void bus::reset() {
+void Bus::reset() {
     cpu.reset();
     cyclesCounter = 0;
 }
 
-void bus::tick() {
+void Bus::tick() {
     ppu.clock();
     if (cyclesCounter % 3 == 0) cpu.clock();
     cyclesCounter++;

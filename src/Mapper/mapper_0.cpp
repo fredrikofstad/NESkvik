@@ -11,7 +11,7 @@
 #define ROM_32K 0x7FFF
 
 Mapper_0::Mapper_0(uint8_t programBanks, uint8_t charBanks):
-Mapper(programBanks(0), charBanks(0)) {}
+Mapper(programBanks, charBanks) {}
 
 Mapper_0::~Mapper_0() = default;
 

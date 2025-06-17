@@ -3,6 +3,14 @@ project(NESkvik)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/thirdparty)
+
+set(SDL2_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/")
+
+
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIR})
+
 add_executable(NESkvik src/main.cpp
         src/CPU/Bus.cpp
         src/CPU/Bus.h
@@ -14,6 +22,7 @@ add_executable(NESkvik src/main.cpp
         src/CPU/address_modes.cpp
         src/CPU/address_modes.h
         src/CPU/lookup.h
+        src/CPU/lookup.cpp
         src/PPU/ppu.cpp
         src/PPU/ppu.h
         src/ROM/rom.cpp
@@ -22,3 +31,7 @@ add_executable(NESkvik src/main.cpp
         src/Mapper/mapper.h
         src/Mapper/mapper_0.cpp
         src/Mapper/mapper_0.h)
+
+target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY})
+
+message(STATUS "SDL2_LIBRARY = ${SDL2_LIBRARY}")

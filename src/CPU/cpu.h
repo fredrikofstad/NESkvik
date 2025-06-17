@@ -2,10 +2,9 @@
 // Emulation of a 6502 cpu
 //
 #pragma once
-#include <string>
-#include <vector>
+#include <cstdint>
 
-#include "bus.h"
+class Bus;
 
 namespace flags {
     enum flags {
@@ -25,7 +24,7 @@ class CPU {
 public:
     CPU();
 
-    void AttachBus(bus* bus) {
+    void AttachBus(Bus* bus) {
         this->bus = bus;
     }
 
@@ -46,8 +45,8 @@ public:
     uint8_t read(uint8_t address) const;
     void write(uint8_t address, uint8_t data);
 
-    uint8_t getFlag(flags flag);
-    void setFlag(flags flag, bool value);
+    uint8_t getFlag(flags::flags flag);
+    void setFlag(flags::flags flag, bool value);
 
     uint8_t fetch();
 
@@ -63,7 +62,7 @@ public:
     uint8_t cycles = 0;
 
 private:
-    bus* bus = nullptr;
+    Bus* bus = nullptr;
 
 };
 

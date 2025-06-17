@@ -2,6 +2,7 @@
 
 #include "address_modes.h"
 #include "lookup.h"
+#include "bus.h"
 
 CPU::CPU() {
 }
@@ -32,9 +33,9 @@ void CPU::clock() {
         setFlag(flags::Unused, true);
         pc++;
 
-        cycles = std::get<3>(lookup[current_opcode]);    // get cycles needed
-        uint8_t extra_cycles_addr = std::get<2>(lookup[current_opcode])( *this ); // call address mode function
-        uint8_t extra_cycles_op = std::get<1>(lookup[current_opcode])( *this );   // call opcode function
+        cycles = lookup[current_opcode].cycles;
+        uint8_t extra_cycles_addr = lookup[current_opcode].addressmode(*this);
+        uint8_t extra_cycles_op   = lookup[current_opcode].opcode(*this);
         cycles += (extra_cycles_addr & extra_cycles_op);
     }
     cycles--;
@@ -107,7 +108,7 @@ void CPU::nmi() {
 }
 
 uint8_t CPU::fetch() {
-    if (std::get<2>(lookup[current_opcode]) != address_mode::IMP)
+    if (lookup[current_opcode].addressmode != address_mode::IMP)
         fetched_data = read(address_abs);
     return fetched_data;
 }

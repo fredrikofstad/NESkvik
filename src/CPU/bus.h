@@ -9,10 +9,9 @@
 
 #define RAM_SIZE (2048)
 
-class bus {
+class Bus {
 public:
-    bus();
-
+    Bus();
     CPU cpu;
     PPU ppu;
     shared<ROM> rom;

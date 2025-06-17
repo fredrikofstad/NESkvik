@@ -88,7 +88,7 @@ uint8_t ASL(CPU& cpu) {
     cpu.setFlag(flags::Carry, (cpu.store & 0xFF00) > 0);
     cpu.setFlag(flags::Zero, (cpu.store & 0x00FF) == 0x00);
     cpu.setFlag(flags::Negative, cpu.store & 0x80);
-    if (std::get<2>(lookup[cpu.current_opcode]) != address_mode::IMP)
+    if (lookup[cpu.current_opcode].addressmode != address_mode::IMP)
         cpu.a = cpu.store & 0x00FF;
     else
         cpu.write(cpu.address_abs, cpu.store & 0x00FF);
@@ -398,8 +398,8 @@ uint8_t BRK(CPU& cpu) {
     cpu.sp--;
     cpu.setFlag(flags::Break, false);
 
-    cpu.pc = static_cast<uint16_t>(cpu.read(0xFFFE)) | (
-        static_cast<uint16_t>(cpu.read(0xFFFF)) << 8);
+    cpu.pc = (uint16_t)(cpu.read(0xFFFE)) | (
+        (uint16_t)(cpu.read(0xFFFF)) << 8);
     return 0;
 
 }
