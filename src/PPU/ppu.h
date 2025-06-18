@@ -4,7 +4,7 @@
 //
 
 #pragma once
-#include <cstdint>
+
 #include "../types.h"
 
 
@@ -32,3 +32,9 @@ private:
 
     shared<ROM> rom;
 };
+
+
+/*
+// Assume pixels is a uint32_t[256 * 240] array with RGBA values
+gui.updateFrameBuffer(pixels, 256 * sizeof(uint32_t));
+ */

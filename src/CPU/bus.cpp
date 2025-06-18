@@ -1,5 +1,8 @@
 #include "bus.h"
 
+#include <algorithm>
+#include <sstream>
+
 Bus::Bus() {
     // Clear RAM on startup
     for (auto &i : ram) i = 0x00;
@@ -44,11 +47,15 @@ void Bus::reset() {
 }
 
 void Bus::tick() {
+    if (runMode == RunMode::Paused) return;
+
     ppu.clock();
-    if (cyclesCounter % 3 == 0) cpu.clock();
+    if (cyclesCounter % 3 == 0) {
+        cpu.clock();
+    }
     cyclesCounter++;
+
+    if (runMode == RunMode::Step) {
+        runMode = RunMode::Paused;
+    }
 }
-
-
-
-

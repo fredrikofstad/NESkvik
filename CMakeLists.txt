@@ -30,7 +30,16 @@ add_executable(NESkvik src/main.cpp
         src/Mapper/mapper.cpp
         src/Mapper/mapper.h
         src/Mapper/mapper_0.cpp
-        src/Mapper/mapper_0.h)
+        src/Mapper/mapper_0.h
+        src/GUI/window.cpp
+        src/GUI/window.h
+        src/app.cpp
+        src/app.h
+        src/GUI/gui.cpp
+        src/GUI/gui.h
+        src/GUI/framebuffer.cpp
+        src/GUI/framebuffer.h
+        src/emu.h)
 
 
 add_library(imgui
@@ -40,6 +49,10 @@ add_library(imgui
         thirdparty/imgui/imgui_tables.cpp
         thirdparty/imgui/backends/imgui_impl_sdl2.cpp
         thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
+        src/GUI/Panels/screen_panel.cpp
+        src/GUI/Panels/screen_panel.h
+        src/GUI/Panels/control_panel.cpp
+        src/GUI/Panels/control_panel.h
 )
 
 target_include_directories(imgui PUBLIC

@@ -9,6 +9,13 @@
 
 #define RAM_SIZE (2048)
 
+enum class RunMode {
+    Paused,
+    Running,
+    Step
+};
+
+
 class Bus {
 public:
     Bus();
@@ -24,6 +31,11 @@ public:
     void reset();
     void tick();
 
-private:
+    void setRunMode(RunMode mode) { runMode = mode; }
+    RunMode getRunMode() const { return runMode; }
+
     uint32_t cyclesCounter;
+
+private:
+    RunMode runMode = RunMode::Paused;
 };
