@@ -32,6 +32,23 @@ add_executable(NESkvik src/main.cpp
         src/Mapper/mapper_0.cpp
         src/Mapper/mapper_0.h)
 
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARY})
 
-message(STATUS "SDL2_LIBRARY = ${SDL2_LIBRARY}")
+add_library(imgui
+        thirdparty/imgui/imgui.cpp
+        thirdparty/imgui/imgui_draw.cpp
+        thirdparty/imgui/imgui_widgets.cpp
+        thirdparty/imgui/imgui_tables.cpp
+        thirdparty/imgui/backends/imgui_impl_sdl2.cpp
+        thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
+)
+
+target_include_directories(imgui PUBLIC
+        thirdparty/imgui
+        thirdparty/imgui/backends
+)
+
+target_link_libraries(
+        ${PROJECT_NAME}
+        imgui
+        ${SDL2_LIBRARY}
+)
