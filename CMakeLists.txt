@@ -98,5 +98,5 @@ endif()
 
 # Web version
 if(BUILD_WEB)
-    add_subdirectory(web)
+    add_subdirectory(wasm)
 endif()
