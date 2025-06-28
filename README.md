@@ -1,6 +1,6 @@
-# nesKvik - NES Emulator #
+# NESkvik - NES Emulator #
 
-## Dependencies:
+## Dependencies for Desktop App:
 SDL2
 
 Dear ImGUI
