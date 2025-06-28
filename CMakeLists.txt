@@ -5,11 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 # NESkvik core library
 add_library(NESkvik STATIC
-        core/CPU/Bus.cpp
-        core/CPU/Bus.h
-        core/CPU/CPU.cpp
-        core/CPU/CPU.h
-        core/Types.h
+        core/CPU/bus.cpp
+        core/CPU/bus.h
+        core/CPU/cpu.cpp
+        core/CPU/cpu.h
+        core/types.h
         core/CPU/opcodes.cpp
         core/CPU/opcodes.h
         core/CPU/address_modes.cpp
