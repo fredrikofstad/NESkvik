@@ -20,7 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Ubuntu dependencies
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -32,51 +31,55 @@ jobs:
           sudo sh cmake-3.31.4-linux-x86_64.sh --prefix=/opt/cmake --skip-license
           sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
 
-      # macOS dependencies
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install mingw
+
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           brew install sdl2 cmake
 
-      # Windows dependencies
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          choco install mingw
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-          .\vcpkg\vcpkg install sdl2
-
-      # Configure
-      - name: Configure CMake (Windows)
-        if: matrix.os == 'windows-latest'
-        run: cmake -S . -B build -DBUILD_DESKTOP=ON -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake -G "MinGW Makefiles"
-
-      - name: Configure CMake (others)
-        if: matrix.os != 'windows-latest'
+      - name: Configure CMake
         run: cmake -S . -B build -DBUILD_DESKTOP=ON
 
-      # Build
       - name: Build
         run: cmake --build build --config Release
 
-      # Copy DLLs on Windows
-      - name: Copy required DLLs (Windows)
+      - name: Copy MinGW and SDL2 DLLs
         if: matrix.os == 'windows-latest'
+        shell: pwsh
         run: |
-          $mingwPath = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
-          Copy-Item "$mingwPath\libgcc_s_seh-1.dll" -Destination build/Release
-          Copy-Item "$mingwPath\libstdc++-6.dll" -Destination build/Release
-          Copy-Item "$mingwPath\libwinpthread-1.dll" -Destination build/Release
-          Copy-Item "thirdparty\SDL2\bin\SDL2.dll" -Destination build/Release
+          $mingwPath = (Get-Command g++.exe).Source | Split-Path
+          Write-Host "Using MinGW path: $mingwPath"
+          
+          $neededDLLs = @(
+            "libgcc_s_seh-1.dll",
+            "libstdc++-6.dll",
+            "libwinpthread-1.dll"
+          )
 
-      # Upload artifacts
+          foreach ($dll in $neededDLLs) {
+            $source = Join-Path $mingwPath $dll
+            if (Test-Path $source) {
+              Copy-Item $source -Destination build/Release
+              Write-Host "Copied $dll"
+            }
+            else {
+              Write-Host "Warning: $dll not found in $mingwPath"
+            }
+          }
+
+          # Copy your SDL2.dll from thirdparty folder if you ship it
+          Copy-Item "thirdparty/SDL2/bin/SDL2.dll" -Destination build/Release
+
       - name: Upload artifact (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: NESkvikApp-Windows
-          path: build/Release/*
+          path: build/Release/NESkvikApp.exe
 
       - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
