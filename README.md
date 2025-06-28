@@ -1,7 +1,14 @@
 # NESkvik - NES Emulator #
 
-## Dependencies for Desktop App:
+## Desktop App:
+
+### Dependencies:
 SDL2
 
 Dear ImGUI
 
+## Webapp
+
+### Dependencies:
+
+React
