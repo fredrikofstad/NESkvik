@@ -5,9 +5,15 @@ on:
     branches:
       - master
       - 'feature/**'
+    paths:
+      - 'core/**'
+      - 'desktop/**'
   pull_request:
     branches:
       - master
+    paths:
+      - 'core/**'
+      - 'desktop/**'
 
 jobs:
   build:
