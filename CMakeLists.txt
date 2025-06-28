@@ -3,45 +3,31 @@ project(NESkvik)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/thirdparty)
+# NESkvik core library
+add_library(NESkvik STATIC
+        core/CPU/Bus.cpp
+        core/CPU/Bus.h
+        core/CPU/CPU.cpp
+        core/CPU/CPU.h
+        core/Types.h
+        core/CPU/opcodes.cpp
+        core/CPU/opcodes.h
+        core/CPU/address_modes.cpp
+        core/CPU/address_modes.h
+        core/CPU/lookup.cpp
+        core/CPU/lookup.h
+        core/PPU/ppu.cpp
+        core/PPU/ppu.h
+        core/ROM/rom.cpp
+        core/ROM/rom.h
+        core/Mapper/mapper.cpp
+        core/Mapper/mapper.h
+        core/Mapper/mapper_0.cpp
+        core/Mapper/mapper_0.h
+        core/emu.h
+)
 
-set(SDL2_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/")
-
-
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIR})
-
-add_executable(NESkvik src/main.cpp
-        src/CPU/Bus.cpp
-        src/CPU/Bus.h
-        src/CPU/CPU.cpp
-        src/CPU/CPU.h
-        src/Types.h
-        src/CPU/opcodes.cpp
-        src/CPU/opcodes.h
-        src/CPU/address_modes.cpp
-        src/CPU/address_modes.h
-        src/CPU/lookup.h
-        src/CPU/lookup.cpp
-        src/PPU/ppu.cpp
-        src/PPU/ppu.h
-        src/ROM/rom.cpp
-        src/ROM/rom.h
-        src/Mapper/mapper.cpp
-        src/Mapper/mapper.h
-        src/Mapper/mapper_0.cpp
-        src/Mapper/mapper_0.h
-        src/GUI/window.cpp
-        src/GUI/window.h
-        src/app.cpp
-        src/app.h
-        src/GUI/gui.cpp
-        src/GUI/gui.h
-        src/GUI/framebuffer.cpp
-        src/GUI/framebuffer.h
-        src/emu.h)
-
-
+# imgui as separate static lib
 add_library(imgui
         thirdparty/imgui/imgui.cpp
         thirdparty/imgui/imgui_draw.cpp
@@ -49,19 +35,55 @@ add_library(imgui
         thirdparty/imgui/imgui_tables.cpp
         thirdparty/imgui/backends/imgui_impl_sdl2.cpp
         thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
-        src/GUI/Panels/screen_panel.cpp
-        src/GUI/Panels/screen_panel.h
-        src/GUI/Panels/control_panel.cpp
-        src/GUI/Panels/control_panel.h
+        desktop/Panels/screen_panel.cpp
+        desktop/Panels/screen_panel.h
+        desktop/Panels/control_panel.cpp
+        desktop/Panels/control_panel.h
 )
 
-target_include_directories(imgui PUBLIC
+target_include_directories(imgui SYSTEM PUBLIC
         thirdparty/imgui
         thirdparty/imgui/backends
 )
 
-target_link_libraries(
-        ${PROJECT_NAME}
-        imgui
-        ${SDL2_LIBRARY}
-)
+# Optionally build the desktop app
+option(BUILD_DESKTOP "Build the native desktop GUI" ON)
+
+if(BUILD_DESKTOP)
+
+    # Third-party dependencies
+
+    set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/thirdparty)
+    set(SDL2_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/")
+    set(SDL2_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/bin")
+
+    find_package(SDL2 REQUIRED)
+    include_directories(${SDL2_INCLUDE_DIR})
+
+    add_executable(NESkvikApp
+            desktop/window.cpp
+            desktop/window.h
+            desktop/app.cpp
+            desktop/app.h
+            desktop/gui.cpp
+            desktop/gui.h
+            desktop/framebuffer.cpp
+            desktop/framebuffer.h
+            desktop/main.cpp
+    )
+
+    target_include_directories(NESkvikApp SYSTEM PRIVATE
+            ${SDL2_INCLUDE_DIR}
+    )
+
+    target_link_libraries(NESkvikApp
+            PRIVATE NESkvik imgui ${SDL2_LIBRARY}
+    )
+
+    # need the dll in same folder as executable
+    add_custom_command(TARGET NESkvikApp POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL2_DLL_PATH}/SDL2.dll"
+            $<TARGET_FILE_DIR:NESkvikApp>
+    )
+endif()
