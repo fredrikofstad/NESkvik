@@ -29,7 +29,7 @@ jobs:
           wget https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-x86_64.sh
           sudo mkdir /opt/cmake
           sudo sh cmake-3.31.4-linux-x86_64.sh --prefix=/opt/cmake --skip-license
-          sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+          sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
 
       - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
