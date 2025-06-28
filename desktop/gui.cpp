@@ -5,12 +5,11 @@
 #include "gui.h"
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_sdlrenderer2.h>
-
 #include "imgui_internal.h"
+#include <cmath>
 
 #define WIDTH 256
 #define HEIGHT 240
-
 
 Gui::Gui(SDL_Window* window, SDL_Renderer* renderer, Emulator* emu)
     : m_renderer(renderer),
@@ -18,8 +17,6 @@ Gui::Gui(SDL_Window* window, SDL_Renderer* renderer, Emulator* emu)
       m_emu(emu),
       m_screen(*m_framebuffer),
       m_controls(&m_screen.scaleRef(), m_emu)
-
-
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -27,7 +24,6 @@ Gui::Gui(SDL_Window* window, SDL_Renderer* renderer, Emulator* emu)
     // Enable docking
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
 
     ImGui::StyleColorsDark();
 
@@ -62,8 +58,6 @@ void Gui::render() {
     ImGui::SetNextWindowDockID(ImGui::GetID("MainDockSpace"), ImGuiCond_FirstUseEver);
     if (m_showScreen)
         m_screen.render();
-
-
 
     ImGui::SetNextWindowDockID(ImGui::GetID("MainDockSpace"), ImGuiCond_FirstUseEver);
 }
@@ -141,14 +135,9 @@ void Gui::renderMenuBar() {
     }
 }
 
-
 void Gui::updateFrameBuffer() {
     m_framebuffer->update();
 }
-
-
-// Test
-
 
 void Gui::updateFrameBufferTestPattern(float time) {
     constexpr int width = 256;
