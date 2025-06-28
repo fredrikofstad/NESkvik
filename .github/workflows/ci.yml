@@ -1,0 +1,67 @@
+name: NESkvik CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install SDL2 (system) for Linux/macOS
+      - name: Install SDL2 on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install -y libsdl2-dev
+
+      - name: Install SDL2 on macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install sdl2
+
+      # (Optional) Windows SDL2 - you can use your thirdparty directly
+      - name: Setup Windows SDL2
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "Using thirdparty SDL2 on Windows"
+
+      - name: Configure CMake
+        run: cmake -B build -DBUILD_DESKTOP=ON
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      # Artifact upload (optional)
+      - name: Upload executable (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NESkvikApp-Windows
+          path: build/Release/NESkvikApp.exe
+
+      - name: Upload executable (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NESkvikApp-Linux
+          path: build/NESkvikApp
+
+      - name: Upload executable (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NESkvikApp-macOS
+          path: build/NESkvikApp
