@@ -27,38 +27,29 @@ add_library(NESkvik STATIC
         core/emu.h
 )
 
-# imgui as separate static lib
-add_library(imgui
-        thirdparty/imgui/imgui.cpp
-        thirdparty/imgui/imgui_draw.cpp
-        thirdparty/imgui/imgui_widgets.cpp
-        thirdparty/imgui/imgui_tables.cpp
-        thirdparty/imgui/backends/imgui_impl_sdl2.cpp
-        thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
-        desktop/Panels/screen_panel.cpp
-        desktop/Panels/screen_panel.h
-        desktop/Panels/control_panel.cpp
-        desktop/Panels/control_panel.h
-)
-
-target_include_directories(imgui SYSTEM PUBLIC
-        thirdparty/imgui
-        thirdparty/imgui/backends
-)
-
-# Optionally build the desktop app
+# Optionally build the desktop GUI
 option(BUILD_DESKTOP "Build the native desktop GUI" ON)
 
 if(BUILD_DESKTOP)
 
-    # Third-party dependencies
+    # imgui as separate static lib
+    add_library(imgui
+            thirdparty/imgui/imgui.cpp
+            thirdparty/imgui/imgui_draw.cpp
+            thirdparty/imgui/imgui_widgets.cpp
+            thirdparty/imgui/imgui_tables.cpp
+            thirdparty/imgui/backends/imgui_impl_sdl2.cpp
+            thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
+            desktop/Panels/screen_panel.cpp
+            desktop/Panels/screen_panel.h
+            desktop/Panels/control_panel.cpp
+            desktop/Panels/control_panel.h
+    )
 
-    set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/thirdparty)
-    set(SDL2_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/")
-    set(SDL2_DLL_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/bin")
-
-    find_package(SDL2 REQUIRED)
-    include_directories(${SDL2_INCLUDE_DIR})
+    target_include_directories(imgui SYSTEM PUBLIC
+            thirdparty/imgui
+            thirdparty/imgui/backends
+    )
 
     add_executable(NESkvikApp
             desktop/window.cpp
@@ -72,18 +63,26 @@ if(BUILD_DESKTOP)
             desktop/main.cpp
     )
 
-    target_include_directories(NESkvikApp SYSTEM PRIVATE
-            ${SDL2_INCLUDE_DIR}
-    )
+    if(MSVC)
+        message(STATUS "MSVC detected, using vcpkg SDL2")
+        find_package(SDL2 CONFIG REQUIRED)
+        target_link_libraries(NESkvikApp PRIVATE NESkvik imgui SDL2::SDL2 SDL2::SDL2main)
+    else()
+        message(STATUS "Non-MSVC detected, using local SDL2 static .a")
+        set(SDL2_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2")
+        target_include_directories(NESkvikApp SYSTEM PRIVATE
+                ${SDL2_PATH}/include
+        )
+        target_link_libraries(NESkvikApp
+                PRIVATE NESkvik imgui
+                ${SDL2_PATH}/lib/libSDL2.a
+                ${SDL2_PATH}/lib/libSDL2main.a
+        )
+        add_custom_command(TARGET NESkvikApp POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${SDL2_PATH}/bin/SDL2.dll"
+                $<TARGET_FILE_DIR:NESkvikApp>
+        )
+    endif()
 
-    target_link_libraries(NESkvikApp
-            PRIVATE NESkvik imgui ${SDL2_LIBRARY}
-    )
-
-    # need the dll in same folder as executable
-    add_custom_command(TARGET NESkvikApp POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL2_DLL_PATH}/SDL2.dll"
-            $<TARGET_FILE_DIR:NESkvikApp>
-    )
 endif()
