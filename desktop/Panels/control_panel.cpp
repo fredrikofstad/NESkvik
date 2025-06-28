@@ -5,8 +5,7 @@
 #include "control_panel.h"
 #include "../../core/emu.h"
 
-#include <format>
-
+#include <cstdio> // for snprintf
 #include <imgui.h>
 
 void ControlsPanel::render() {
@@ -54,15 +53,16 @@ void ControlsPanel::render() {
     // --- Simple RAM hex dump (page $0000 and $8000) ---
     auto dump = [&](uint16_t base, int rows, int cols)
     {
+        char linebuf[512];
         for (int r=0; r<rows; ++r)
         {
-            std::string line = "$" + std::format("{:04X}:", base + r*cols);
+            int offset = snprintf(linebuf, sizeof(linebuf), "$%04X:", base + r*cols);
             for (int c=0; c<cols; ++c)
             {
                 uint8_t v = m_emulator->bus.read(base + r*cols + c, true);
-                line += " " + std::format("{:02X}", v);
+                offset += snprintf(linebuf + offset, sizeof(linebuf) - offset, " %02X", v);
             }
-            ImGui::TextUnformatted(line.c_str());
+            ImGui::TextUnformatted(linebuf);
         }
     };
 

@@ -20,23 +20,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install SDL2 (system) for Linux/macOS
-      - name: Install SDL2 on Linux
+      - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt update
-          sudo apt install -y libsdl2-dev
+          sudo apt install -y libsdl2-dev wget
+          sudo apt remove --purge --auto-remove cmake -y
+          wget https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-x86_64.sh
+          sudo mkdir /opt/cmake
+          sudo sh cmake-3.31.4-linux-x86_64.sh --prefix=/opt/cmake --skip-license
+          sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
 
-      - name: Install SDL2 on macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install sdl2
-
-      # (Optional) Windows SDL2 - you can use your thirdparty directly
-      - name: Setup Windows SDL2
+      - name: Install dependencies (Windows)
         if: matrix.os == 'windows-latest'
         run: |
-          echo "Using thirdparty SDL2 on Windows"
+          choco install sdl2
+
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install sdl2 cmake
 
       - name: Configure CMake
         run: cmake -B build -DBUILD_DESKTOP=ON
@@ -44,22 +47,21 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      # Artifact upload (optional)
-      - name: Upload executable (Windows)
+      - name: Upload artifact (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: NESkvikApp-Windows
           path: build/Release/NESkvikApp.exe
 
-      - name: Upload executable (Linux)
+      - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: NESkvikApp-Linux
           path: build/NESkvikApp
 
-      - name: Upload executable (macOS)
+      - name: Upload artifact (macOS)
         if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
