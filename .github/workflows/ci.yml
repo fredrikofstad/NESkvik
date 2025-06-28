@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Linux
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -31,35 +32,51 @@ jobs:
           sudo sh cmake-3.31.4-linux-x86_64.sh --prefix=/opt/cmake --skip-license
           sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
 
-      - name: Install dependencies (Windows)
-        if: matrix.os == 'windows-latest'
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-          .\vcpkg\vcpkg install sdl2
-
+      # macOS
       - name: Install dependencies (macOS)
         if: matrix.os == 'macos-latest'
         run: |
           brew install sdl2 cmake
 
+      # Windows with MSYS2 / MinGW
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-SDL2
+            make
+
+      # Configure CMake
       - name: Configure CMake (Windows)
         if: matrix.os == 'windows-latest'
-        run: cmake -S . -B build -DBUILD_DESKTOP=ON -DCMAKE_TOOLCHAIN_FILE=./vcpkg/scripts/buildsystems/vcpkg.cmake
+        shell: msys2 {0}
+        run: cmake -S . -B build -G "MinGW Makefiles" -DBUILD_DESKTOP=ON
 
       - name: Configure CMake (others)
         if: matrix.os != 'windows-latest'
         run: cmake -S . -B build -DBUILD_DESKTOP=ON
 
-      - name: Build
+      # Build
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
         run: cmake --build build --config Release
 
+      - name: Build (others)
+        if: matrix.os != 'windows-latest'
+        run: cmake --build build --config Release
+
+      # Artifacts
       - name: Upload artifact (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: NESkvikApp-Windows
-          path: build/Release/NESkvikApp.exe
+          path: build/NESkvikApp.exe
 
       - name: Upload artifact (Linux)
         if: matrix.os == 'ubuntu-latest'
