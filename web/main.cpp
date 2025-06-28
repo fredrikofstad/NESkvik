@@ -21,11 +21,16 @@ extern "C" {
     // Run one frame of the emulator (called from JS)
     EMSCRIPTEN_KEEPALIVE
     void runFrame() {
-        //emulator.runFrame(1);
-        for (int i = 0; i < FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 4; ++i) {
-            framebuffer[i] = static_cast<uint8_t>(std::rand() % 256);
+        static uint8_t color = 0;
+        color += 1;
+        for (int i = 0; i < FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 4; i += 4) {
+            framebuffer[i + 0] = color;      // R
+            framebuffer[i + 1] = 0;          // G
+            framebuffer[i + 2] = 0;          // B
+            framebuffer[i + 3] = 255;        // A
         }
     }
+
 
     // Get pointer to framebuffer (for JS to blit)
     EMSCRIPTEN_KEEPALIVE
