@@ -7,6 +7,10 @@ function App() {
       <p>
         NESkvik - Nes Emulator
       </p>
+
+        <p>
+            Tv with framebuffer texture
+        </p>
     </>
   )
 }
