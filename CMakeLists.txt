@@ -3,6 +3,11 @@ project(NESkvik)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# optionally build web or desktop
+option(BUILD_WEB "Build the web version via Emscripten" OFF)
+option(BUILD_DESKTOP "Build the native desktop GUI" OFF)
+
+
 # NESkvik core library
 add_library(NESkvik STATIC
         core/CPU/bus.cpp
@@ -27,31 +32,30 @@ add_library(NESkvik STATIC
         core/emu.h
 )
 
-# imgui as separate static lib
-add_library(imgui
-        thirdparty/imgui/imgui.cpp
-        thirdparty/imgui/imgui_draw.cpp
-        thirdparty/imgui/imgui_widgets.cpp
-        thirdparty/imgui/imgui_tables.cpp
-        thirdparty/imgui/backends/imgui_impl_sdl2.cpp
-        thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
-        desktop/Panels/screen_panel.cpp
-        desktop/Panels/screen_panel.h
-        desktop/Panels/control_panel.cpp
-        desktop/Panels/control_panel.h
-)
 
-target_include_directories(imgui SYSTEM PUBLIC
-        thirdparty/imgui
-        thirdparty/imgui/backends
-)
-
-# Optionally build the desktop app
-option(BUILD_DESKTOP "Build the native desktop GUI" ON)
 
 if(BUILD_DESKTOP)
 
     # Third-party dependencies
+
+    # imgui as separate static lib
+    add_library(imgui
+            thirdparty/imgui/imgui.cpp
+            thirdparty/imgui/imgui_draw.cpp
+            thirdparty/imgui/imgui_widgets.cpp
+            thirdparty/imgui/imgui_tables.cpp
+            thirdparty/imgui/backends/imgui_impl_sdl2.cpp
+            thirdparty/imgui/backends/imgui_impl_sdlrenderer2.cpp
+            desktop/Panels/screen_panel.cpp
+            desktop/Panels/screen_panel.h
+            desktop/Panels/control_panel.cpp
+            desktop/Panels/control_panel.h
+    )
+
+    target_include_directories(imgui SYSTEM PUBLIC
+            thirdparty/imgui
+            thirdparty/imgui/backends
+    )
 
     set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/thirdparty)
     set(SDL2_PATH "${CMAKE_SOURCE_DIR}/thirdparty/SDL2/")
@@ -74,6 +78,8 @@ if(BUILD_DESKTOP)
             desktop/main.cpp
     )
 
+    set_target_properties(NESkvikApp PROPERTIES OUTPUT_NAME "neskvik")
+
     target_include_directories(NESkvikApp SYSTEM PRIVATE
             ${SDL2_INCLUDE_DIR}
     )
@@ -88,4 +94,9 @@ if(BUILD_DESKTOP)
             "${SDL2_DLL_PATH}/SDL2.dll"
             $<TARGET_FILE_DIR:NESkvikApp>
     )
+endif()
+
+# Web version
+if(BUILD_WEB)
+    add_subdirectory(wasm)
 endif()

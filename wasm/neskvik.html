@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NESkvik Web</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+<canvas id="screen" width="256" height="240"></canvas>
+<script type="module">
+    import NESkvik from "./neskvik.js";  // ES6 style import
+
+    NESkvik().then((Module) => {
+        console.log("NESkvik WASM loaded!");
+
+        const canvas = document.getElementById("screen");
+        const ctx = canvas.getContext("2d");
+        const imageData = ctx.createImageData(256, 240);
+
+        Module._initEmu();
+
+        function render() {
+            Module._runFrame();
+
+            const fbPtr = Module._getFramebufferPtr();
+            const fbSize = 256 * 240 * 4;
+
+            const fbData = new Uint8Array(Module.HEAPU8.buffer, fbPtr, fbSize);
+
+            imageData.data.set(fbData);
+            ctx.putImageData(imageData, 0, 0);
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+    });
+</script>
+</body>
+</html>
