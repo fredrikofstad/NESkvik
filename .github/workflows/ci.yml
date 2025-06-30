@@ -1,0 +1,109 @@
+name: NESkvik CI
+
+on:
+  push:
+    branches:
+      - master
+      - 'feature/**'
+    paths:
+      - 'core/**'
+      - 'desktop/**'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'core/**'
+      - 'desktop/**'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Linux
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install -y libsdl2-dev wget
+          sudo apt remove --purge --auto-remove cmake -y
+          wget https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-linux-x86_64.sh
+          sudo mkdir /opt/cmake
+          sudo sh cmake-3.31.4-linux-x86_64.sh --prefix=/opt/cmake --skip-license
+          sudo ln -sf /opt/cmake/bin/cmake /usr/local/bin/cmake
+
+      # macOS
+      - name: Install dependencies (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install sdl2 cmake
+
+      # Windows with MSYS2 / MinGW
+      - name: Install dependencies (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-SDL2
+            make
+
+      # Configure CMake
+      - name: Configure CMake (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: cmake -S . -B build -DBUILD_DESKTOP=ON
+
+      - name: Configure CMake (others)
+        if: matrix.os != 'windows-latest'
+        run: cmake -S . -B build -DBUILD_DESKTOP=ON
+
+      # Build
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: cmake --build build --config Release
+
+      - name: Build (others)
+        if: matrix.os != 'windows-latest'
+        run: cmake --build build --config Release
+
+      # Copy required Windows DLLs
+      - name: Bundle Windows DLLs
+        if: matrix.os == 'windows-latest'
+        shell: msys2 {0}
+        run: |
+          cp /mingw64/bin/libgcc_s_seh-1.dll build/
+          cp /mingw64/bin/libstdc++-6.dll build/
+          cp /mingw64/bin/libwinpthread-1.dll build/
+          cp /mingw64/bin/SDL2.dll build/
+
+      # Artifacts
+      - name: Upload artifact (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NESkvikApp-Windows
+          path: build/*
+
+      - name: Upload artifact (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NESkvikApp-Linux
+          path: build/NESkvikApp
+
+      - name: Upload artifact (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NESkvikApp-macOS
+          path: build/NESkvikApp
