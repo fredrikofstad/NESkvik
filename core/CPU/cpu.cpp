@@ -7,11 +7,11 @@
 CPU::CPU() {
 }
 
-uint8_t CPU::read(uint8_t address) const {
+uint8_t CPU::read(uint16_t address) const {
     return bus->read(address);
 }
 
-void CPU::write(uint8_t address, uint8_t data) {
+void CPU::write(uint16_t address, uint8_t data) {
     return bus->write(address, data);
 }
 
@@ -28,8 +28,10 @@ void CPU::setFlag(flags::flags flag, bool value) {
 }
 
 void CPU::clock() {
+    printf("CPU clock running: cycles=%d PC=%04X\n", cycles, pc);
     if (cycles == 0) {
         current_opcode = read(pc);
+        printf("CPU fetched opcode %02X at PC=%04X\n", current_opcode, pc);
         setFlag(flags::Unused, true);
         pc++;
 
@@ -42,20 +44,19 @@ void CPU::clock() {
 }
 
 void CPU::reset() {
-    address_abs = 0xFFFC;
-    uint16_t low = read(address_abs + 0);
-    uint16_t high = read(address_abs + 1);
-
+    // fetch reset vector properly
+    uint16_t low  = bus->read(0xFFFC);
+    uint16_t high = bus->read(0xFFFD);
     pc = (high << 8) | low;
 
-    // Resets registers
+    printf("CPU reset vector: low=%02X high=%02X PC=%04X\n", low, high, pc);
+
     a = 0;
     x = 0;
     y = 0;
     sp = 0xFD;
     status = 0x00 | flags::Unused;
 
-    // reset remaining data
     address_abs = 0x0000;
     address_rel = 0x0000;
     fetched_data = 0x00;
@@ -108,8 +109,10 @@ void CPU::nmi() {
 }
 
 uint8_t CPU::fetch() {
-    if (lookup[current_opcode].addressmode != address_mode::IMP)
+    if (lookup[current_opcode].addressmode != address_mode::IMP) {
+        printf("fetch() using address_abs=%04X\n", address_abs);
         fetched_data = read(address_abs);
+    }
     return fetched_data;
 }
 

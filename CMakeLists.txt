@@ -29,6 +29,7 @@ add_library(NESkvik STATIC
         core/Mapper/mapper_0.cpp
         core/Mapper/mapper_0.h
         core/emu.h
+        tests/cpu_tests.cpp
 )
 
 # Desktop Build
@@ -40,3 +41,15 @@ endif()
 if(BUILD_WEB)
     add_subdirectory(wasm)
 endif()
+
+# Testing
+add_executable(cpu_tests
+        tests/cpu_tests.cpp
+        core/CPU/address_modes.cpp
+        core/CPU/bus.cpp
+        core/CPU/cpu.cpp
+        core/CPU/lookup.cpp
+        core/CPU/opcodes.cpp
+        tests/stub_ppu.cpp
+        tests/stub_rom.cpp
+)

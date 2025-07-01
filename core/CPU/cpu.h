@@ -42,8 +42,8 @@ public:
     void irq();    // interrupt request signal
     void nmi();    // non-maskable interrupt signal
 
-    uint8_t read(uint8_t address) const;
-    void write(uint8_t address, uint8_t data);
+    uint8_t read(uint16_t address) const;
+    void write(uint16_t address, uint8_t data);
 
     uint8_t getFlag(flags::flags flag);
     void setFlag(flags::flags flag, bool value);
@@ -60,6 +60,10 @@ public:
     uint16_t address_rel = 0x00;
     uint8_t current_opcode = 0x00;
     uint8_t cycles = 0;
+
+    // For testing
+    void setPC(uint16_t address) { pc = address; }
+
 
 private:
     Bus* bus = nullptr;

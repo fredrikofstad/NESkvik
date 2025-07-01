@@ -7,7 +7,10 @@
 #include "../PPU/ppu.h"
 #include "../ROM/rom.h"
 
-#define RAM_SIZE (2048)
+//#define RAM_SIZE (2048)
+
+// for cpu testing
+#define RAM_SIZE (0x10000)
 
 enum class RunMode {
     Paused,
@@ -38,4 +41,15 @@ public:
 
 private:
     RunMode runMode = RunMode::Paused;
+
+
+// For testing
+public:
+    void loadTestProgram(const std::string &path);
+    void enableTestMode(bool enabled) { cpuTestMode = enabled; }
+    bool isTestMode() const { return cpuTestMode; }
+    std::vector<uint8_t> program;
+private:
+    bool cpuTestMode = false;
+
 };
