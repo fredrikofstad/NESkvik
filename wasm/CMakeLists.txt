@@ -6,7 +6,7 @@ target_link_libraries(neskvik_web NESkvik)
 
 set_target_properties(neskvik_web PROPERTIES
         OUTPUT_NAME "neskvik"
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/web/public
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/web/src/wasm
 )
 
 # pass these to *linker* (not compile)
