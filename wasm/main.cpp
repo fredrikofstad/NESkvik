@@ -13,21 +13,22 @@ extern "C" {
 
     // Initialize the emulator (called from JS)
     EMSCRIPTEN_KEEPALIVE
-    void initEmu() {
+    uint32_t initEmu() {
         //emulator.reset();
         std::srand(static_cast<unsigned>(std::time(nullptr)));
+        static uint32_t result[2] = {FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT};
+        return reinterpret_cast<uint32_t>(result);
     }
 
     // Run one frame of the emulator (called from JS)
     EMSCRIPTEN_KEEPALIVE
     void runFrame() {
-        static uint8_t color = 0;
-        color += 1;
         for (int i = 0; i < FRAMEBUFFER_WIDTH * FRAMEBUFFER_HEIGHT * 4; i += 4) {
-            framebuffer[i + 0] = color;      // R
-            framebuffer[i + 1] = 0;          // G
-            framebuffer[i + 2] = 0;          // B
-            framebuffer[i + 3] = 255;        // A
+            uint8_t gray = std::rand() % 256;   // random brightness 0–255
+            framebuffer[i + 0] = gray;          // R
+            framebuffer[i + 1] = gray;          // G
+            framebuffer[i + 2] = gray;          // B
+            framebuffer[i + 3] = 255;           // A
         }
     }
 
