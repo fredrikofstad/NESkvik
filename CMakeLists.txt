@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 # optionally build web or desktop
 option(BUILD_WEB "Build the web version via Emscripten" OFF)
 option(BUILD_DESKTOP "Build the native desktop GUI" OFF)
+option(BUILD_TEST "Build the test version" OFF)
 
 # NESkvik core library
 add_library(NESkvik STATIC
@@ -29,7 +30,6 @@ add_library(NESkvik STATIC
         core/Mapper/mapper_0.cpp
         core/Mapper/mapper_0.h
         core/emu.h
-        tests/cpu_tests.cpp
 )
 
 # Desktop Build
@@ -42,14 +42,26 @@ if(BUILD_WEB)
     add_subdirectory(wasm)
 endif()
 
-# Testing
-add_executable(cpu_tests
-        tests/cpu_tests.cpp
-        core/CPU/address_modes.cpp
-        core/CPU/bus.cpp
-        core/CPU/cpu.cpp
-        core/CPU/lookup.cpp
-        core/CPU/opcodes.cpp
-        tests/stub_ppu.cpp
-        tests/stub_rom.cpp
-)
+if(BUILD_TEST)
+    add_executable(cpu_tests
+            tests/cpu_tests.cpp
+            core/CPU/address_modes.cpp
+            core/CPU/bus.cpp
+            core/CPU/cpu.cpp
+            core/CPU/lookup.cpp
+            core/CPU/opcodes.cpp
+            tests/stub_ppu.cpp
+            tests/stub_rom.cpp
+    )
+
+    add_executable(addressing_tests
+            core/CPU/address_modes.cpp
+            core/CPU/bus.cpp
+            core/CPU/cpu.cpp
+            core/CPU/lookup.cpp
+            core/CPU/opcodes.cpp
+            tests/stub_ppu.cpp
+            tests/stub_rom.cpp
+            tests/addressing_tests.cpp
+    )
+endif()

@@ -40,13 +40,13 @@ public:
     uint32_t cyclesCounter;
 
 private:
-    RunMode runMode = RunMode::Paused;
+    RunMode runMode = RunMode::Running;
 
 
 // For testing
 public:
     void loadTestProgram(const std::string &path);
-    void enableTestMode(bool enabled) { cpuTestMode = enabled; }
+    void enableTestMode(bool enabled) { cpuTestMode = enabled; cpu.enableTrace(enabled); }
     bool isTestMode() const { return cpuTestMode; }
     std::vector<uint8_t> program;
 private:

@@ -19,14 +19,14 @@ bool isPPURam(const uint16_t address) {
 }
 
 uint8_t Bus::read(uint16_t address, bool readOnly) const {
-    // test harness for Klaus or other CPU tests
+    // test for CPU tests
     if (cpuTestMode) {
         if (address >= 0x8000 && !program.empty()) {
             size_t offset = address - 0x8000;
             printf("Bus::read from program offset=%04X val=%02X\n", offset, program[offset]);
             return program[offset];
         }
-        printf("Bus::read from ram[%04X] = %02X\n", address, ram[address]);
+        printf("Bus::read TESTMODE addr=%04X val=%02X\n", address, ram[address]);
         return ram[address];
     }
 
@@ -76,7 +76,6 @@ void Bus::reset() {
 
 void Bus::tick() {
     if (runMode == RunMode::Paused) {
-        printf("Bus::tick: Paused\n");
         return;
     }
 

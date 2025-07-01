@@ -28,28 +28,36 @@ void CPU::setFlag(flags::flags flag, bool value) {
 }
 
 void CPU::clock() {
-    printf("CPU clock running: cycles=%d PC=%04X\n", cycles, pc);
     if (cycles == 0) {
         current_opcode = read(pc);
-        printf("CPU fetched opcode %02X at PC=%04X\n", current_opcode, pc);
+
+        if (lookup[current_opcode].opcode == nullptr || lookup[current_opcode].addressmode == nullptr) {
+            printf("ERROR: lookup table entry for opcode %02X is null!\n", current_opcode);
+            exit(1);
+        }
+        pc++;  // advance PC after fetching
+
         setFlag(flags::Unused, true);
-        pc++;
 
         cycles = lookup[current_opcode].cycles;
-        uint8_t extra_cycles_addr = lookup[current_opcode].addressmode(*this);
-        uint8_t extra_cycles_op   = lookup[current_opcode].opcode(*this);
-        cycles += (extra_cycles_addr & extra_cycles_op);
+
+        uint8_t additional_cycle1 = lookup[current_opcode].addressmode(*this);
+        uint8_t additional_cycle2 = lookup[current_opcode].opcode(*this);
+
+        cycles += (additional_cycle1 & additional_cycle2);
+
+        if (trace) {
+            printf("TRACE PC=%04X OPCODE=%02X Fetched=%02X A=%02X X=%02X Y=%02X SP=%02X STATUS=%02X\n",
+                   pc - 1, current_opcode, fetched_data, a, x, y, sp, status);
+        }
     }
     cycles--;
 }
 
 void CPU::reset() {
-    // fetch reset vector properly
     uint16_t low  = bus->read(0xFFFC);
     uint16_t high = bus->read(0xFFFD);
     pc = (high << 8) | low;
-
-    printf("CPU reset vector: low=%02X high=%02X PC=%04X\n", low, high, pc);
 
     a = 0;
     x = 0;
@@ -110,7 +118,6 @@ void CPU::nmi() {
 
 uint8_t CPU::fetch() {
     if (lookup[current_opcode].addressmode != address_mode::IMP) {
-        printf("fetch() using address_abs=%04X\n", address_abs);
         fetched_data = read(address_abs);
     }
     return fetched_data;
@@ -127,7 +134,7 @@ void CPU::branchIf(bool condition) {
     }
 }
 
-void CPU::compare(uint8_t reg) {
+void CPU::compare(uint8_t& reg) {
     fetch();
     store = static_cast<uint16_t>(reg) - static_cast<uint16_t>(fetched_data);
     setFlag(flags::Carry, reg >= fetched_data);
@@ -135,7 +142,7 @@ void CPU::compare(uint8_t reg) {
     setFlag(flags::Negative, store & 0x0080);
 }
 
-uint8_t CPU::load(uint8_t reg) {
+uint8_t CPU::load(uint8_t& reg) {
     fetch();
     reg = fetched_data;
     setFlag(flags::Zero, reg == 0x00);

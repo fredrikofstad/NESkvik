@@ -1,6 +1,8 @@
 //
 // NESkvik - Fredrik Ofstad
 //
+#include "SDL.h"
+#undef main
 
 #include "app.h"
 

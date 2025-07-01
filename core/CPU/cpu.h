@@ -51,8 +51,8 @@ public:
     uint8_t fetch();
 
     void branchIf(bool condition);
-    void compare(uint8_t reg);
-    uint8_t load(uint8_t reg);
+    void compare(uint8_t& reg);
+    uint8_t load(uint8_t& reg);
 
     uint8_t fetched_data = 0x00;
     uint8_t store = 0x000;
@@ -63,6 +63,8 @@ public:
 
     // For testing
     void setPC(uint16_t address) { pc = address; }
+    bool trace = false;
+    void enableTrace(bool enabled) { trace = enabled; }
 
 
 private:
