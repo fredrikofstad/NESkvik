@@ -3,6 +3,7 @@
     import { useEffect, useRef } from 'react'
     import * as THREE from 'three'
 
+
     type TVModelProps = {
         framebuffer: Uint8Array
         width: number
@@ -10,7 +11,7 @@
     }
 
     export default function TV({ framebuffer, width, height }: TVModelProps) {
-        const gltf = useGLTF('/tv.glb')
+        const gltf = useGLTF('tv.glb')
 
         const textureRef = useRef(
             new THREE.DataTexture(framebuffer, width, height, THREE.RGBAFormat)

@@ -4,6 +4,9 @@ import { OrbitControls } from '@react-three/drei'
 import TV from './components/TV'
 import createEmuModule from './wasm/neskvik.js'
 
+//import { CRTEffect } from './shaders/crtShader.js'
+
+
 type EmulatorState = {
     Module: any
     runFrame: () => void
@@ -55,11 +58,9 @@ export default function App() {
 
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
-            <Canvas
-                camera={{ position: [0, 0, 3.5] }}
-            >
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[5, 5, 5]} />
+            <Canvas camera={{ position: [0, 0, 3.5] }}>
+                <ambientLight intensity={3} />
+                <directionalLight intensity={2} position={[1, 1, 1]} />
 
                 {emu && (
                     <>
@@ -73,6 +74,7 @@ export default function App() {
                 )}
 
                 <OrbitControls />
+
             </Canvas>
         </div>
     )
