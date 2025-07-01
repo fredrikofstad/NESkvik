@@ -57,7 +57,7 @@ export default function App() {
     }, [])
 
     return (
-        <div style={{ width: '100vw', height: '100vh' }}>
+        <div className="scene-container">
             <Canvas camera={{ position: [0, 0, 3.5] }}>
                 <ambientLight intensity={3} />
                 <directionalLight intensity={2} position={[1, 1, 1]} />
