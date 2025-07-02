@@ -66,11 +66,11 @@ add_executable(NESkvikApp
 
 set_target_properties(NESkvikApp PROPERTIES OUTPUT_NAME "neskvik")
 
-if (MINGW)
-    set_target_properties(NESkvikApp PROPERTIES
-            LINK_FLAGS "-mconsole"
-    )
-endif()
+#if (MINGW)
+#    set_target_properties(NESkvikApp PROPERTIES
+#            LINK_FLAGS "-mconsole"
+#    )
+#endif()
 
 target_include_directories(NESkvikApp SYSTEM PRIVATE
     ${SDL2_INCLUDE_DIR}
