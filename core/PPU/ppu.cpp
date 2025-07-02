@@ -82,6 +82,7 @@ void PPU::attachRom(shared<ROM> rom) {
     this->rom = rom;
 }
 
+
 void PPU::clock() {
 }
 
@@ -105,3 +106,4 @@ void PPU::reset() {
     vram_address.reg = 0x0000;
     tram_address.reg = 0x0000;
 }
+
