@@ -5,6 +5,11 @@
 #include "ppu.h"
 
 
+PPU::PPU() {
+
+}
+
+
 
 uint8_t PPU::mainBusRead(uint16_t address, bool readOnly) const {
     switch (address) {
