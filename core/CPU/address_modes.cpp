@@ -4,6 +4,8 @@
 
 #include "address_modes.h"
 
+#include <cstdio>
+
 #include "cpu.h"
 
 uint8_t address_mode::IMP(CPU &cpu) {
@@ -38,6 +40,7 @@ uint8_t address_mode::ZPY(CPU &cpu) {
 }
 
 uint8_t address_mode::ABS(CPU &cpu) {
+    printf("address_mode::ABS invoked at PC=%04X\n", cpu.pc);
     uint16_t low = cpu.read(cpu.pc);
     cpu.pc++;
     uint16_t high = cpu.read(cpu.pc);

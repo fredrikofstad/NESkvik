@@ -20,7 +20,20 @@ public:
     bool ppuBusRead(uint16_t address, uint8_t &data);
     bool ppuBusWrite(uint16_t address, uint8_t data);
 
+    void reset();
+
+    bool isImageValid() const {return validImage;}
+
+    enum Mirror {
+        Horizontal,
+        Vertical,
+        Onescreen_high,
+        Onescreen_low,
+    } mirror = Horizontal;
+
 private:
+    bool validImage = false;
+
     std::vector<uint8_t> program_memory;
     std::vector<uint8_t> char_memory;
 

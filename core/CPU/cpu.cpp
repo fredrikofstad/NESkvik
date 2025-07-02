@@ -7,11 +7,11 @@
 CPU::CPU() {
 }
 
-uint8_t CPU::read(uint8_t address) const {
+uint8_t CPU::read(uint16_t address) const {
     return bus->read(address);
 }
 
-void CPU::write(uint8_t address, uint8_t data) {
+void CPU::write(uint16_t address, uint8_t data) {
     return bus->write(address, data);
 }
 
@@ -30,32 +30,41 @@ void CPU::setFlag(flags::flags flag, bool value) {
 void CPU::clock() {
     if (cycles == 0) {
         current_opcode = read(pc);
+
+        if (lookup[current_opcode].opcode == nullptr || lookup[current_opcode].addressmode == nullptr) {
+            printf("ERROR: lookup table entry for opcode %02X is null!\n", current_opcode);
+            exit(1);
+        }
+        pc++;  // advance PC after fetching
+
         setFlag(flags::Unused, true);
-        pc++;
 
         cycles = lookup[current_opcode].cycles;
-        uint8_t extra_cycles_addr = lookup[current_opcode].addressmode(*this);
-        uint8_t extra_cycles_op   = lookup[current_opcode].opcode(*this);
-        cycles += (extra_cycles_addr & extra_cycles_op);
+
+        uint8_t additional_cycle1 = lookup[current_opcode].addressmode(*this);
+        uint8_t additional_cycle2 = lookup[current_opcode].opcode(*this);
+
+        cycles += (additional_cycle1 & additional_cycle2);
+
+        if (trace) {
+            printf("TRACE PC=%04X OPCODE=%02X Fetched=%02X A=%02X X=%02X Y=%02X SP=%02X STATUS=%02X\n",
+                   pc - 1, current_opcode, fetched_data, a, x, y, sp, status);
+        }
     }
     cycles--;
 }
 
 void CPU::reset() {
-    address_abs = 0xFFFC;
-    uint16_t low = read(address_abs + 0);
-    uint16_t high = read(address_abs + 1);
-
+    uint16_t low  = bus->read(0xFFFC);
+    uint16_t high = bus->read(0xFFFD);
     pc = (high << 8) | low;
 
-    // Resets registers
     a = 0;
     x = 0;
     y = 0;
     sp = 0xFD;
     status = 0x00 | flags::Unused;
 
-    // reset remaining data
     address_abs = 0x0000;
     address_rel = 0x0000;
     fetched_data = 0x00;
@@ -108,8 +117,9 @@ void CPU::nmi() {
 }
 
 uint8_t CPU::fetch() {
-    if (lookup[current_opcode].addressmode != address_mode::IMP)
+    if (lookup[current_opcode].addressmode != address_mode::IMP) {
         fetched_data = read(address_abs);
+    }
     return fetched_data;
 }
 
@@ -124,7 +134,7 @@ void CPU::branchIf(bool condition) {
     }
 }
 
-void CPU::compare(uint8_t reg) {
+void CPU::compare(uint8_t& reg) {
     fetch();
     store = static_cast<uint16_t>(reg) - static_cast<uint16_t>(fetched_data);
     setFlag(flags::Carry, reg >= fetched_data);
@@ -132,7 +142,7 @@ void CPU::compare(uint8_t reg) {
     setFlag(flags::Negative, store & 0x0080);
 }
 
-uint8_t CPU::load(uint8_t reg) {
+uint8_t CPU::load(uint8_t& reg) {
     fetch();
     reg = fetched_data;
     setFlag(flags::Zero, reg == 0x00);
