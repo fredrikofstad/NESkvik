@@ -18,7 +18,7 @@ bool isPPURam(const uint16_t address) {
     return address <= 0x2000 || address >= 0x3FFF;
 }
 
-uint8_t Bus::read(uint16_t address, bool readOnly) const {
+uint8_t Bus::read(uint16_t address, bool readOnly) {
     // test for CPU tests
     if (cpuTestMode) {
         if (address >= 0x8000 && !program.empty()) {
@@ -45,6 +45,10 @@ uint8_t Bus::read(uint16_t address, bool readOnly) const {
     else if (rom && rom->mainBusRead(address, data)) {
         return data;
     }
+    else if (address >= 0x4016 && address <= 0x4017){
+        data = (controller_state[address & 0x0001] & 0x80) > 0;
+        controller_state[address & 0x0001] <<= 1;
+    }
     return data;
 }
 
@@ -55,14 +59,17 @@ void Bus::write(uint16_t address, uint8_t data) {
         ram[address] = data;
         return;
     }
-
     // NES mode
     if (address <= 0x1FFF) {
         ram[address & 0x07FF] = data;
     } else if (address >= 0x2000 && address <= 0x3FFF) {
         ppu.mainBusWrite(address & 0x0007, data);
+    } else if (address >= 0x4016 && address <= 0x4017) {
+        controller_state[address & 0x0001] = controller[address & 0x0001];
     }
     // PRG-ROM writes typically ignored or handled by mapper
+
+
 }
 void Bus::attachRom(const shared<ROM> &rom) {
     this->rom = rom;
@@ -70,7 +77,10 @@ void Bus::attachRom(const shared<ROM> &rom) {
 }
 
 void Bus::reset() {
+    rom.reset();
     cpu.reset();
+
+    ppu.reset();
     cyclesCounter = 0;
 }
 
@@ -84,6 +94,11 @@ void Bus::tick() {
     if (cyclesCounter % 3 == 0) {
         cpu.clock();
     }
+    if (ppu.nmi) {
+        ppu.nmi = false;
+        cpu.nmi();
+    }
+
     cyclesCounter++;
 
     if (runMode == RunMode::Step) {

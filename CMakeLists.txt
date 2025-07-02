@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
 project(NESkvik)
+enable_testing()
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -30,6 +31,7 @@ add_library(NESkvik STATIC
         core/Mapper/mapper_0.cpp
         core/Mapper/mapper_0.h
         core/emu.h
+        core/PPU/ppu_registers.h
 )
 
 # Desktop Build
@@ -43,6 +45,7 @@ if(BUILD_WEB)
 endif()
 
 if(BUILD_TEST)
+    add_compile_definitions(BUILD_TEST=1)
     add_executable(cpu_tests
             tests/cpu_tests.cpp
             core/CPU/address_modes.cpp
@@ -53,6 +56,7 @@ if(BUILD_TEST)
             tests/stub_ppu.cpp
             tests/stub_rom.cpp
     )
+    add_test(NAME CpuTests COMMAND cpu_tests)
 
     add_executable(addressing_tests
             core/CPU/address_modes.cpp
@@ -64,4 +68,5 @@ if(BUILD_TEST)
             tests/stub_rom.cpp
             tests/addressing_tests.cpp
     )
+    add_test(NAME AddressingTests COMMAND addressing_tests)
 endif()

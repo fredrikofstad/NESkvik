@@ -24,6 +24,8 @@ ROM::ROM(const std::string &filename) {
         char unused[5];
     } header;
 
+    validImage = false;
+
     std::ifstream ifstream;
     ifstream.open(filename, std::ifstream::binary);
     if (ifstream.is_open()) {
@@ -33,6 +35,7 @@ ROM::ROM(const std::string &filename) {
             ifstream.seekg(512, std::ios_base::cur);
         // determine mapper id
         mapperID = ((header.mapper2 >> 4) << 4) | (header.mapper1 >> 4);
+        mirror = (header.mapper1 & 0x01) ? Vertical : Horizontal;
         // determine file format
         uint8_t fileType = 1;
         if (fileType == 1) {
@@ -41,7 +44,8 @@ ROM::ROM(const std::string &filename) {
             ifstream.read(reinterpret_cast<char *>(program_memory.data()), program_memory.size());
 
             char_banks = header.chr_chunks;
-            char_memory.resize(char_banks * CHR_BANK_SIZE);
+            if (char_banks == 0) char_memory.resize(CHR_BANK_SIZE);
+            else char_memory.resize(char_banks * CHR_BANK_SIZE);
             ifstream.read(reinterpret_cast<char *>(char_memory.data()), char_memory.size());
         }
 
@@ -52,8 +56,11 @@ ROM::ROM(const std::string &filename) {
             default: break;
         }
 
+        validImage = true;
         ifstream.close();
     }
+
+
 }
 
 bool ROM::mainBusRead(uint16_t address, uint8_t &data) {
@@ -86,4 +93,9 @@ bool ROM::ppuBusWrite(uint16_t address, uint8_t data) {
         return true;
     }
     return false;
+}
+
+void ROM::reset() {
+    if (mapper != nullptr)
+        mapper.reset();
 }

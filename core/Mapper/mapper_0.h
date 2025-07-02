@@ -12,7 +12,9 @@ public:
     ~Mapper_0() override;
 
     bool cpuMapRead(uint16_t address, uint32_t &mapped_address) override;
-    bool cpuMapWrite(uint16_t address, uint32_t &mapped_address) override;
+    bool cpuMapWrite(uint16_t address, uint32_t &mapped_address, uint8_t data = 0) override;
     bool ppuMapRead(uint16_t address, uint32_t &mapped_address) override;
     bool ppuMapWrite(uint16_t address, uint32_t &mapped_address) override;
+
+    void reset() override;
 };
