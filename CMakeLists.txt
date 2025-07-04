@@ -31,6 +31,7 @@ add_library(NESkvik STATIC
         core/Mapper/mapper_0.cpp
         core/Mapper/mapper_0.h
         core/emu.h
+        core/emu.cpp
         core/PPU/ppu_registers.h
 )
 
@@ -67,6 +68,16 @@ if(BUILD_TEST)
             tests/stub_ppu.cpp
             tests/stub_rom.cpp
             tests/addressing_tests.cpp
+            core/emu.cpp
     )
+
+    add_executable(ppu_tests
+            core/PPU/ppu.cpp
+            tests/ppu_tests.cpp
+            core/ROM/rom.cpp
+            core/Mapper/mapper.cpp
+            core/Mapper/mapper_0.cpp
+    )
+
     add_test(NAME AddressingTests COMMAND addressing_tests)
 endif()

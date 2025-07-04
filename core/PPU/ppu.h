@@ -5,9 +5,15 @@
 
 #pragma once
 
+#include <array>
+#include <vector>
+#include <memory>
+
 #include "../types.h"
 #include "ppu_registers.h"
 
+#define SCREEN_WIDTH 256
+#define SCREEN_HEIGHT 240
 
 class ROM;
 
@@ -25,16 +31,33 @@ public:
 
 
     void attachRom(shared<ROM> rom);
+
+    uint8_t GetPaletteIndex(uint8_t palette, uint8_t pixel);
+
     void clock();
+
+    std::vector<unsigned> getRGBFrameBuffer() const;
+
     void reset();
 
     bool nmi = false;
 
     bool frameComplete = false;
 
+    //API
+    const uint8_t* GetFrameBuffer() const { return framebuffer; }
+    const uint32_t* GetPaletteColors() const { return paletteColors.data(); }
+
+
 
 
 private:
+
+    // Framebuffer holds pixel palette indices (0-63)
+    uint8_t framebuffer[SCREEN_WIDTH * SCREEN_HEIGHT] = {0};
+
+    std::array<uint32_t, 64> paletteColors;
+
     //vram
     uint8_t nameTable[2][1024];
     uint8_t paletteTable[32];
@@ -65,6 +88,22 @@ private:
     uint16_t bg_shifter_pattern_hi = 0x0000;
     uint16_t bg_shifter_attrib_lo  = 0x0000;
     uint16_t bg_shifter_attrib_hi  = 0x0000;
+
+
+    //For testin
+
+public:
+    void loadPatternTable(int table, int index, uint8_t value);
+    void loadNameTable(int table, int index, uint8_t value);
+    void loadPalette(int index, uint8_t value);
+    void setControlReg(uint8_t value);
+    void setMaskReg(uint8_t value);
+    void setScanline(int16_t value);
+    void setCycle(int16_t value);
+    uint8_t getFramebufferPixel(int x, int y);
+
+    static int getScreenWidth() { return SCREEN_WIDTH; }
+    static int getScreenHeight() { return SCREEN_HEIGHT; }
 
 };
 

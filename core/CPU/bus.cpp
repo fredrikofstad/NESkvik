@@ -12,10 +12,10 @@ Bus::Bus() {
 }
 
 bool isSystemRam(const uint16_t address) {
-    return address <= 0x0000 || address >= 0x1FFF;
+    return address >= 0x0000 && address <= 0x1FFF;
 }
 bool isPPURam(const uint16_t address) {
-    return address <= 0x2000 || address >= 0x3FFF;
+    return address >= 0x2000 && address <= 0x3FFF;
 }
 
 uint8_t Bus::read(uint16_t address, bool readOnly) {

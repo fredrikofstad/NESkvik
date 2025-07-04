@@ -1,54 +1,63 @@
-#include "../core/CPU/cpu.h"
-#include "../core/CPU/bus.h"
+#include "../core/PPU/ppu.h"
+#include "../core/ROM/rom.h"
 #include <cstdio>
+#include <memory>
 
 int main() {
-    Bus bus;
+    PPU ppu;
 
-    // enable test mode
-    bus.enableTestMode(true);
-    printf("test mode enabled\n");
+    // Load ROM (adjust path as needed)
+    std::string romPath = R"(C:\Dev\C\NESkvik\tests\roms\nestest.nes)";
+    auto rom = std::make_shared<ROM>(romPath);
+    ppu.attachRom(rom);
 
-    // load Klaus binary
-    bus.loadTestProgram("../../tests/bin/6502_functional_test.bin");
+    ppu.reset();
 
-    // sanity print
-    printf("testbin loaded, first opcode at 0x0400 = %02X\n", bus.ram[0x400]);
+    // Load simple pattern table data for visible tiles
+    // We'll create two tiles: tile 0 is empty, tile 1 is a checkerboard pattern
+    // Each tile is 16 bytes: 8 bytes for bitplane 0 and 8 bytes for bitplane 1
 
-    // reset
-    bus.reset();
+    // Tile 0 (empty tile)
+    for (int i = 0; i < 16; i++) {
+        ppu.loadPatternTable(0, i, 0x00);
+    }
 
-    // run mode
-    bus.setRunMode(RunMode::Running);
+    // Tile 1 (checkerboard pattern)
+    uint8_t checkerboard_plane0[8] = { 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55 }; // 10101010 / 01010101
+    uint8_t checkerboard_plane1[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // all zeros
+    for (int i = 0; i < 8; i++) {
+        ppu.loadPatternTable(0, 16 + i, checkerboard_plane0[i]);
+        ppu.loadPatternTable(1, 16 + i, checkerboard_plane1[i]);
+    }
 
-    // safety counter
-    uint64_t tick_count = 0;
-    const uint64_t max_ticks = 50'000'000;
+    // Fill nametable with tile 1 to see checkerboards on the screen
+    for (int i = 0; i < 1024; i++) {
+        ppu.loadNameTable(0, i, 1);  // tile 1 index
+    }
 
-    while (true) {
-        bus.tick();
-        tick_count++;
+    // Setup a simple palette (index 1 = color 0x3F, index 0 = 0x00)
+    for (int i = 0; i < 32; i++) {
+        ppu.loadPalette(i, i & 0x3F);
+    }
 
-        // after reset, current_opcode is only valid once cycles==0
-        if (bus.cpu.cycles == 0 && bus.cpu.current_opcode == 0x00) {
-            printf("\nBRK detected at PC=%04X\n", bus.cpu.pc);
-            printf("A=%02X X=%02X Y=%02X SP=%02X STATUS=%02X\n",
-                   bus.cpu.a, bus.cpu.x, bus.cpu.y, bus.cpu.sp, bus.cpu.status);
+    // Setup control and mask to enable background rendering from pattern table 0
+    ppu.setControlReg(0x00);  // Background pattern table 0
+    ppu.setMaskReg(0x08);     // Enable background rendering
 
-            // typical Klaus success code: store to 0x0002
-            printf("Final RAM[0x02] = %02X\n", bus.ram[0x02]);
-            if (bus.ram[0x02] == 0) {
-                printf("Klaus functional test PASSED!\n");
-            } else {
-                printf("Klaus functional test FAILED!\n");
-            }
-            break;
+    // Run one full frame: 341 cycles * 261 scanlines
+    const int totalCycles = 341 * 261;
+    for (int i = 0; i < totalCycles; ++i) {
+        ppu.clock();
+    }
+
+    // Print top-left 16x10 pixels of the framebuffer as palette indices (hex)
+    printf("Framebuffer snapshot (top-left 16x10 pixels):\n");
+    for (int y = 0; y < 10; y++) {
+        for (int x = 0; x < 16; x++) {
+            uint8_t pixel = ppu.getFramebufferPixel(x, y);
+            printf("%02X ", pixel);
         }
-
-        if (tick_count >= max_ticks) {
-            printf("Timeout — gave up after %llu ticks.\n", max_ticks);
-            break;
-        }
+        printf("\n");
     }
 
     return 0;

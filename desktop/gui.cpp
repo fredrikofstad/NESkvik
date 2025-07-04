@@ -136,6 +136,13 @@ void Gui::renderMenuBar() {
 }
 
 void Gui::updateFrameBuffer() {
+    // Get raw RGB framebuffer from emulator's PPU
+    const auto& rgbPixels = m_emu->ppu.getRGBFrameBuffer();
+
+    // Copy pixels into your Framebuffer's pixel buffer
+    auto& pixels = m_framebuffer->pixels(); // this is std::vector<uint32_t>
+    std::copy(rgbPixels.begin(), rgbPixels.end(), pixels.begin());
+
     m_framebuffer->update();
 }
 

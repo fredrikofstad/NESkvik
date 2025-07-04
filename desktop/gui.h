@@ -9,8 +9,7 @@
 #include "Panels/screen_panel.h"
 #include "../core/types.h"
 #include "Panels/control_panel.h"
-
-class Emulator;
+#include "../core/emu.h"
 
 class Gui {
 public:

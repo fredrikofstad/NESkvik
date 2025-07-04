@@ -43,7 +43,7 @@ public:
     uint32_t cyclesCounter;
 
 private:
-    RunMode runMode = RunMode::Running;
+    RunMode runMode = RunMode::Paused;
     // might want to expose this for frontend
     uint8_t controller_state[2];
 

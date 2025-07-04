@@ -71,8 +71,10 @@ bool ROM::mainBusRead(uint16_t address, uint8_t &data) {
     return false;
 }
 
+
+
 bool ROM::mainBusWrite(uint16_t address, uint8_t data) {
-    if (uint32_t mapped_address = 0; mapper->cpuMapRead(address, mapped_address)){
+    if (uint32_t mapped_address = 0; mapper->cpuMapWrite(address, mapped_address, data)) {
         program_memory[mapped_address] = data;
         return true;
     }
